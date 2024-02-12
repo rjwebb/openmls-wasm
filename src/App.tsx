@@ -1,41 +1,50 @@
-import { useEffect } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
+import { useCallback, useState } from 'react'
 import './App.css'
 
-import * as something from "openmls-wasm"
+import * as openmls from "openmls-wasm"
 
 function App() {
-  useEffect(() => {
-    something.register("name").then((c) => {
-      console.log(c)
-    })
-  })
+  const [client, setClient] = useState()
+  const [groupName, setGroupName] = useState("")
 
-  // useEffect(() => {
-  //   (something.World.new()).greet()
-  // })
+  const register = async () => {
+    const client = await openmls.register("name")
+    setClient(client)
+  }
+
+  const update = async () => {
+    if(!client) return
+
+    await openmls.update(client, "hello")
+  }
+
+  const create_kp = async () => {
+    if(!client) return
+    const newClient = await openmls.create_kp(client)
+    setClient(newClient)
+  }
+
+  const create_group = useCallback(async () => {
+    if(!client) return
+    if(!groupName) return
+    const newClient = await openmls.create_group(client, groupName)
+    setClient(newClient)
+    setGroupName("")
+  }, [client, groupName])
 
   return (
     <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+      <div className="flex-column">
+        {client && JSON.stringify(client)}
+        <button onClick={register}>Register</button>
+        <button onClick={update}>Update</button>
+        <button onClick={create_kp}>Create KP</button>
+        <button onClick={create_group}>Create Group</button>
+        <input placeholder='group name' type="text" onChange={(e) => {
+          e.preventDefault()
+          setGroupName(e.target.value)
+        }}/>
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
     </>
   )
 }
