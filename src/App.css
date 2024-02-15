@@ -5,8 +5,18 @@
   text-align: center;
 }
 
+.container {
+  width: 768px
+}
+
 .flex-column {
   display: flex;
   flex-direction: column;
+  gap: 10px;
+}
+
+.flex-row {
+  display: flex;
+  flex-direction: row;
   gap: 10px;
 }
